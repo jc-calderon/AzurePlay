@@ -1,0 +1,207 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="WhatsSend">
+    <link rel="icon" href="assets/favicon.ico">
+    <title>AzurePlay</title>
+
+    <link href="//amp.azure.net/libs/amp/2.3.2/skins/amp-default/azuremediaplayer.min.css" rel="stylesheet">
+    <script src="//amp.azure.net/libs/amp/2.3.2/azuremediaplayer.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.1.7/dist/vuetify.min.css" rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link href="css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <v-app id="inspire" :dark="setTheme">
+            <v-navigation-drawer v-model="drawer"
+                                 app
+                                 clipped>
+                <v-list dense>
+                    <v-list-item @click="getMovies()">
+                        <v-list-item-action>
+                            <v-icon>mdi-movie</v-icon>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                            <v-list-item-title>Movies</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-switch :label="`Dark Theme`" v-model="goDark"></v-switch>
+                    </v-list-item>
+                </v-list>
+            </v-navigation-drawer>
+
+            <v-navigation-drawer v-model="rigthDrawer"
+                                 app
+                                 right
+                                 clipped
+                                 temporary>
+                <v-img :src="movie.urlBackdropPath"></v-img>
+                <v-card-title>
+                    {{ movie.title }} {{ movie.releaseDate | formatDate}}
+                </v-card-title>
+
+                <v-card-text>
+                    <div class="text--primary">
+                        {{ movie.overview }}
+                    </div>
+                </v-card-text>
+
+                <v-chip class="ma-1"
+                        color="primary"
+                        v-for="genre in movie.genres">
+                    {{ genre.name }}
+                </v-chip>
+            </v-navigation-drawer>
+
+            <v-app-bar app
+                       clipped-left>
+                <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+                <v-toolbar-title><v-icon>mdi-television-play</v-icon>AzurePlay</v-toolbar-title>
+            </v-app-bar>
+
+            <v-content>
+                <v-dialog v-model="videoPlayerShow" fullscreen hide-overlay transition="dialog-bottom-transition">
+                    <v-btn color="white"
+                           fab
+                           icon
+                           fixed
+                           top
+                           left
+                           @click="stopVideoPlayer">
+                        <v-icon>mdi-arrow-left</v-icon>
+                    </v-btn>
+                    <video id="video-player" class="video-player azuremediaplayer amp-default-skin amp-big-play-centered"></video>
+                </v-dialog>
+
+                <v-container fluid v-if="!videoPlayerShow"
+                             fill-width>
+                    <v-row flex-start>
+                        <v-col>
+                            <h2>Recently Added</h2>
+                            <v-sheet class="mx-auto"
+                                     elevation="8"
+                                     max-width="100%">
+                                <v-slide-group class="pa-4"
+                                               active-class="success"
+                                               show-arrows>
+                                    <v-slide-item v-for="movie in movies.recentlyAdded">
+                                        <v-card class="ma-1" max-width="200">
+                                            <v-hover v-slot:default="{ hover }">
+                                                <v-img class="white--text align-end cursor-pointer"
+                                                       height="350"
+                                                       :src="movie.urlPosterPath">
+                                                    <v-card-title>{{ movie.title }} {{ movie.releaseDate | formatDate}}</v-card-title>
+                                                    <v-expand-transition>
+                                                        <div v-if="hover"
+                                                             class="d-flex transition-fast-in-fast-out black darken-2 v-card--reveal display-3 white--text"
+                                                             style="height: 100%;"
+                                                             @click="playMovie(movie.urlVideo)">
+                                                            <v-btn absolute
+                                                                   color="orange"
+                                                                   class="white--text"
+                                                                   fab
+                                                                   x-large>
+                                                                <v-icon>mdi-play</v-icon>
+                                                            </v-btn>
+                                                        </div>
+                                                    </v-expand-transition>
+                                                </v-img>
+                                            </v-hover>
+
+                                            <v-card-actions>
+                                                <h3>
+                                                    {{ movie.runtime | formatTime}}
+                                                </h3>
+                                                <v-spacer></v-spacer>
+                                                <v-btn icon
+                                                       color="primary"
+                                                       @click="showOverview(movie)">
+                                                    <v-icon>mdi-more</v-icon>
+                                                </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-slide-item>
+                                </v-slide-group>
+                            </v-sheet>
+                        </v-col>
+                    </v-row>
+
+                    <v-row flex-start>
+                        <v-col>
+                            <h2>Movies</h2>
+                            <v-sheet class="mx-auto"
+                                     elevation="8"
+                                     max-width="100%">
+                                <v-slide-group class="pa-4"
+                                               active-class="success"
+                                               show-arrows>
+                                    <v-slide-item v-for="movie in movies.all">
+                                        <v-card class="card" max-width="200">
+                                            <v-hover v-slot:default="{ hover }">
+                                                <v-img class="white--text align-end cursor-pointer"
+                                                       height="350px"
+                                                       :src="movie.urlPosterPath">
+                                                    <v-card-title>{{ movie.title }} {{ movie.releaseDate | formatDate}}</v-card-title>
+                                                    <v-expand-transition>
+                                                        <div v-if="hover"
+                                                             class="d-flex transition-fast-in-fast-out black darken-2 v-card--reveal display-3 white--text"
+                                                             style="height: 100%;"
+                                                             @click="playMovie(movie.urlVideo)">
+                                                            <v-btn absolute
+                                                                   color="orange"
+                                                                   class="white--text"
+                                                                   fab
+                                                                   x-large>
+                                                                <v-icon>mdi-play</v-icon>
+                                                            </v-btn>
+                                                        </div>
+                                                    </v-expand-transition>
+                                                </v-img>
+                                            </v-hover>
+
+                                            <v-card-actions>
+                                                <h3>
+                                                    {{ movie.runtime | formatTime}}
+                                                </h3>
+                                                <v-spacer></v-spacer>
+                                                <v-btn icon
+                                                       color="primary"
+                                                       @click="showOverview(movie)">
+                                                    <v-icon>mdi-more</v-icon>
+                                                </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </v-slide-item>
+                                </v-slide-group>
+                            </v-sheet>
+                        </v-col>
+                    </v-row>
+                </v-container>
+            </v-content>
+
+            <v-footer app>
+                <span>&copy; AzurePlay 2019</span>
+            </v-footer>
+        </v-app>
+    </div>
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/babel-polyfill/dist/polyfill.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.1.7/dist/vuetify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@aspnet/signalr@1.0.3/dist/browser/signalr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

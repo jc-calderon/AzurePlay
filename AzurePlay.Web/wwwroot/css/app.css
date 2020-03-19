@@ -1,0 +1,22 @@
+﻿.cursor-pointer {
+    cursor: pointer;
+}
+
+.v-card--reveal {
+    align-items: center;
+    bottom: 0;
+    justify-content: center;
+    opacity: .5;
+    position: absolute;
+    width: 100%;
+}
+
+.video-player {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.card {
+    margin-right: 10px;
+    margin-left: 10px;
+}
