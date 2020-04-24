@@ -10,6 +10,7 @@ A complete demo project using .NET Core and some Microsoft Azure Services
 |Core| Azure KeyVault, Media Services, Storage, DI, log4net, Loggly | | The implementation of modules like Azure, logging, DI, etc.|
 
 ## Services required
+* Microsoft Azure SQL Database
 * Microsoft Azure Storage
 * Microsoft Azure Key Vault
 * Microsoft Azure Functions
