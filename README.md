@@ -1,5 +1,6 @@
 # AzurePlay
 A complete demo project using .NET Core and some Microsoft Azure Services
+![Architecture](https://raw.githubusercontent.com/jc-calderon/AzurePlay/master/Architecture.png)
 
 ## Projects
 |__Project__|__Tech__|__Deploy in Azure__|__Description__|
